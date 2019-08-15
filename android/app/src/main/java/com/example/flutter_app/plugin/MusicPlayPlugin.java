@@ -36,12 +36,13 @@ public class MusicPlayPlugin implements MethodChannel.MethodCallHandler{
         switch (methodCall.method){
             case "play":
                 Log.d(TAG,"methodCall.argument(\"url\"):"+methodCall.argument("url"));
+
                 MediaPlayerTools.getInstance().play(methodCall.argument("url"));
                 break;
             case "stop":
                 break;
             case "onPause":
-                MediaPlayerTools.getInstance().pause();
+                MediaPlayerTools.getInstance().onResume();
                 break;
             case "onDestory":
                 break;
