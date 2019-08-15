@@ -109,6 +109,8 @@ class BannerWidgetState extends State<BannerWidget> {
 //  }
 
   Widget viewPages() {
+
+
          return Scaffold(
         body: Container(
           height: 120.0, //确保pageview的高度
@@ -125,16 +127,30 @@ class BannerWidgetState extends State<BannerWidget> {
                   child: widget.bannerBuild == null
                       ? memoryImage(index)
                       : widget.bannerBuild(index,
-                      widget.bannerData[index % widget.bannerData.length]));
+                      initBanner(index)));
             },
             onPageChanged: onPageChanged,
-            reverse: false, //是否反转页面的顺序
+            reverse: true, //是否反转页面的顺序
           ),
         ),
       );
 
 
   }
+
+  BannerBean initBanner(int index){
+    BannerBean bannerBean=null;
+    var bannerLength=0;
+    if(widget.bannerData!=null&&widget.bannerData.length>0){
+      bannerLength=widget.bannerData.length;
+      bannerBean=widget.bannerData[index %bannerLength];
+    }else{
+      bannerBean=new BannerBean(
+          imageUrl: "http://img.pconline.com.cn/images/upload/upc/tx/bbs6/1010/24/c1/5622801_1287922101936_1024x1024.jpg", titleStr: "flutter云音乐", intentType: 0);
+    }
+    return bannerBean;
+  }
+
   Widget memoryImage(int index){
     if(widget!=null&&widget.bannerData!=null&&widget.bannerData.length>0){
       return FadeInImage.memoryNetwork(

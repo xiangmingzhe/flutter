@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/dialog/bottom/bottomdialog.dart';
 import 'package:flutter_app/dialog/customdialog.dart';
 import 'package:flutter_app/model/song/SongInfoModel.dart';
+import 'package:flutter_app/ui/play/play_details.dart';
 import 'package:flutter_app/widget/banner_page.dart';
 import 'package:path/path.dart';
 import 'http/ServerApi.dart';
@@ -42,31 +44,32 @@ void _bannerPress(int position, BannerBean entity) {
 //声明一个调用对象，需要把kotlin中注册的ChannelName传入构造函数
 const _platform = const MethodChannel('com.mrper.framework.plugins/toast');
 const _musicPlatform = const MethodChannel('com.mrper.framework.plugins/music');
-const sendMessagePlugin = const EventChannel('com.flutter.app/sendmessageplugin');
+const sendMessagePlugin =
+    const EventChannel('com.flutter.app/sendmessageplugin');
 
 StreamSubscription _subscription = null;
 
 var _count;
+var iconUrl;
 SongInfo songInfo;
-
+BottomDialog bottomDialog;
 class test extends StatefulWidget {
   @override
   _testState createState() => _testState();
 }
 
 Future<dynamic> getSongInfo(var url, BuildContext context) async {
-  var loadingDialog=new LoadingDialog(
+  var loadingDialog = new LoadingDialog(
     outsideDismiss: true,
     dismissCallback: _disMissCallBack(context),
   );
   loadingDialog.initDialog();
   loadingDialog.createState();
-   showDialog(
-       context: context,
-       builder: (context) {
-         return loadingDialog;
-       }
-   );
+  showDialog(
+      context: context,
+      builder: (context) {
+        return loadingDialog;
+      });
   var httpClient = new HttpClient();
   var request = await httpClient.getUrl(Uri.parse(url));
   var response = await request.close();
@@ -75,21 +78,27 @@ Future<dynamic> getSongInfo(var url, BuildContext context) async {
   songInfo = SongInfo.fromJson(json.decode(responseBody));
   if (songInfo != null) {
     var imageUrl = songInfo.albumImg.replaceAll("{size}", "");
-    print("url:" + "${songInfo.url}" + "---" + songInfo.albumImg);
+    loadingDialog.dialog.dimissDialog();
     _musicPlatform
         .invokeMethod('play', {'url': "${songInfo.url}"}); //调用相应方法，并传入相关参数。
-    showBottomDialog(context, imageUrl, songInfo.songName, songInfo.singerName);
-    loadingDialog.dialog.dimissDialog();
+//    showBottomDialog(context, imageUrl, songInfo.songName, songInfo.singerName);
+    if(bottomDialog==null){
+      bottomDialog=new BottomDialog();
+      bottomDialog.updateDialogData(imageUrl, songInfo.songName, songInfo.singerName);
+      bottomDialog.showBottomDialog(context,_platform,_musicPlatform);
+    }else{
+      bottomDialog.updateDialogData(imageUrl, songInfo.songName, songInfo.singerName);
+    }
+
   }
 }
+
 //这个func 就是关闭Dialog的方法
 _disMissCallBack(BuildContext context) {
 //  Navigator.of(context, rootNavigator: true).pop();
 //  Navigator.of(context).pop();
 //  Navigator.pop(context);
-
 }
-
 
 OverlayEntry bottomOverlayEntry;
 /**
@@ -97,7 +106,7 @@ OverlayEntry bottomOverlayEntry;
  */
 void showBottomDialog(BuildContext buildContext, String imageUrl,
     String songName, String singerName) {
-
+  iconUrl = "images/s_pause.png";
   bottomOverlayEntry = new OverlayEntry(builder: (context) {
     return new Positioned(
         bottom: 0,
@@ -105,11 +114,19 @@ void showBottomDialog(BuildContext buildContext, String imageUrl,
         height: 90,
         child: new SafeArea(
             child: new Material(
-            child: GestureDetector(
-              onTap: () {
-              _platform.invokeMethod('showall', { 'msg': "点击了悬浮栏"}); //调用相应方法，并传入相关参数。
-              },
-              child: new Container(
+          child: GestureDetector(
+            onTap: () {
+              _platform
+                  .invokeMethod('showall', {'msg': "点击了悬浮栏"}); //调用相应方法，并传入相关参数。
+              Navigator.push(
+                context,
+                new MaterialPageRoute(
+                  builder: (context) => new PlayDetails(songInfo: songInfo),
+                ),
+              );
+              bottomOverlayEntry.remove();
+            },
+            child: new Container(
               color: Colors.amberAccent,
               child: new Row(
                 children: <Widget>[
@@ -119,28 +136,29 @@ void showBottomDialog(BuildContext buildContext, String imageUrl,
                   ),
                   new Container(
                       child: new Column(
-                        children: <Widget>[
-                          new Container(
-                            child: new Column(
-                              children: <Widget>[Text(songName.trim())],
-                            ),
-                            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 2.0, 2.0),
-                          ),
-                          new Container(
-                            child: new Column(
-                              children: <Widget>[Text(singerName.trim())],
-                            ),
-                            padding: const EdgeInsets.fromLTRB(8.0, 4.0, 2.0, 2.0),
-                          )
+                    children: <Widget>[
+                      new Container(
+                        child: new Column(
+                          children: <Widget>[Text(songName.trim())],
+                        ),
+                        padding: const EdgeInsets.fromLTRB(8.0, 8.0, 2.0, 2.0),
+                      ),
+                      new Container(
+                        child: new Column(
+                          children: <Widget>[Text(singerName.trim())],
+                        ),
+                        padding: const EdgeInsets.fromLTRB(8.0, 8.0, 2.0, 2.0),
+                      )
 //                    new Positioned(top: 20,width: 60,height: 60,child: new Text(songName)),new Positioned(bottom: 20,width: 60,height: 60,child: new Text(singerName))
-                        ],
-                      )),
+                    ],
+                  )),
                   new Container(
+                    margin:EdgeInsets.only(left: 80),
                     child: new Row(
                       children: <Widget>[
                         InkWell(
                           child: new Image(
-                              image: new AssetImage("images/s_pause.png")),
+                              image: new AssetImage(iconUrl,),height: 40,width: 40,),
                           onTap: () {
                             _musicPlatform.invokeMethod(
                                 'onPause', {'url': null}); //调用相应方法，并传入相关参数。
@@ -148,12 +166,13 @@ void showBottomDialog(BuildContext buildContext, String imageUrl,
                         )
                       ],
                     ),
-                    padding: const EdgeInsets.fromLTRB(100.0, 2.0, 2.0, 2.0),
+//                    padding: const EdgeInsets.fromLTRB(150.0, 2.0, 2.0, 2.0),
+                    alignment:Alignment.centerRight ,
                   )
                 ],
               ),
             ),
-            ),
+          ),
         )));
   });
   Overlay.of(buildContext).insert(bottomOverlayEntry);
@@ -209,6 +228,14 @@ class _testState extends State<test> {
     setState(() {
       _count = event;
       print("ChannelPage: $event");
+      if (_count == 0) {
+        //播放
+        iconUrl = "images/s_pause.png";
+      } else if (_count == 2) {
+        //暂停
+        iconUrl = "images/s_play.png";
+      }
+      bottomDialog.updateIocn(_count);
     });
   }
 
@@ -219,16 +246,20 @@ class _testState extends State<test> {
     });
   }
 
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     //开启监听
-    if(_subscription == null){
-      _subscription =  sendMessagePlugin.receiveBroadcastStream().listen(_onEvent,onError: _onError);
+    if (_subscription == null) {
+      _subscription = sendMessagePlugin
+          .receiveBroadcastStream()
+          .listen(_onEvent, onError: _onError);
     }
   }
+
+  DateTime lastPopTime;
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -236,10 +267,9 @@ class _testState extends State<test> {
       getMusicData(MUSIC_DATA_URL);
     }
     SelectView selectView = new SelectView(songlist, mAutogenerated, rankList);
-
     return new MaterialApp(
         home: new DefaultTabController(
-            //tab的数量  该字段必须有
+          //tab的数量  该字段必须有
             length: musicList.length,
             child: new Scaffold(
               appBar: new AppBar(
@@ -254,14 +284,13 @@ class _testState extends State<test> {
                         getMusicData(MUSIC_DATA_URL);
                         break;
                       case 1:
-                        getMusicRankingListData(MUSIC_RANK_LIST_DATA_URL);
+                        getMusicRankingListData(
+                            MUSIC_RANK_LIST_DATA_URL);
                         break;
                     }
                   },
                   tabs: musicList.map((MusicTable item) {
-                    return new Tab(text: item.text
-//                        icon: new Icon(item.icon),
-                        );
+                    return new Tab(text: item.text);
                   }).toList(),
                   //是否可以滚动
                   isScrollable: true,
@@ -269,12 +298,70 @@ class _testState extends State<test> {
               ),
               body: new TabBarView(
                   children: musicList.map((MusicTable item) {
-                return new Padding(
-                  padding: EdgeInsets.all(16),
-                  child: new Center(child: selectView),
-                );
-              }).toList()),
+                    return new Padding(
+                      padding: EdgeInsets.all(16),
+                      child: new Center(child: selectView),
+                    );
+                  }).toList()),
             )));
+
+
+
+
+//    return WillPopScope(
+//        child: Scaffold(
+//          body: Center(
+//            child: new MaterialApp(
+//                home: new DefaultTabController(
+//                    //tab的数量  该字段必须有
+//                    length: musicList.length,
+//                    child: new Scaffold(
+//                      appBar: new AppBar(
+//                        title: new Text('网易音乐'),
+//                        backgroundColor: Colors.amber,
+//                        bottom: new TabBar(
+//                          //迭代items 并生成Tab对象
+//                          onTap: (int i) {
+//                            curPosition = i;
+//                            switch (i) {
+//                              case 0:
+//                                getMusicData(MUSIC_DATA_URL);
+//                                break;
+//                              case 1:
+//                                getMusicRankingListData(
+//                                    MUSIC_RANK_LIST_DATA_URL);
+//                                break;
+//                            }
+//                          },
+//                          tabs: musicList.map((MusicTable item) {
+//                            return new Tab(text: item.text);
+//                          }).toList(),
+//                          //是否可以滚动
+//                          isScrollable: true,
+//                        ),
+//                      ),
+//                      body: new TabBarView(
+//                          children: musicList.map((MusicTable item) {
+//                        return new Padding(
+//                          padding: EdgeInsets.all(16),
+//                          child: new Center(child: selectView),
+//                        );
+//                      }).toList()),
+//                    ))),
+//          ),
+//        ),
+//        onWillPop: () async {
+//          if (lastPopTime == null ||
+//              DateTime.now().difference(lastPopTime) > Duration(seconds: 2)) {
+//            lastPopTime = DateTime.now();
+//            _platform
+//                .invokeMethod('showall', {'msg': "再按一次退出"}); //调用相应方法，并传入相关参数。
+//          } else {
+//            lastPopTime = DateTime.now();
+//            // 退出app
+//            await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+//          }
+//        });
   }
 }
 
@@ -306,7 +393,7 @@ class SelectView extends StatelessWidget {
           break;
         }
         bannerList.add(new BannerBean(
-            imageUrl: item.imgurl, titleStr: "网易云音乐", intentType: 0));
+            imageUrl: item.imgurl, titleStr: "flutter云音乐", intentType: 0));
       }
     }
 
@@ -363,9 +450,6 @@ class SelectView extends StatelessWidget {
                 leading: new Icon(Icons.branding_watermark),
                 title: new Text("${songlist[index].filename}"),
                 onTap: () {
-//                  _platform.invokeMethod('showall', { 'msg': "${songlist[index].filename}"}); //调用相应方法，并传入相关参数。
-
-
                   getSongInfo(
                       Config.SONG_INFO_URL + songlist[index].hash, context);
                 },
@@ -389,7 +473,6 @@ class SelectView extends StatelessWidget {
                 leading: new Icon(Icons.branding_watermark),
                 title: new Text("${rankList[index].rankname}"),
                 onTap: () {},
-
               );
             });
         break;

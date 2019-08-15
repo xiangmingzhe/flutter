@@ -12,6 +12,8 @@ class BannerBean extends Object with BannerBeanUtils{
 
   BannerBean({this.imageUrl, this.titleStr, this.intentType});
 
+
+
   @override
   get bannerTitle => titleStr;
 

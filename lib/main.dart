@@ -21,7 +21,7 @@ class FirstScreen extends StatelessWidget {
         child: new RaisedButton(
           child: new Text('跳转'),
           onPressed: () {
-            Navigator.push(context, new MaterialPageRoute(builder: (context) => new test()));
+            Navigator.maybePop(context, new MaterialPageRoute(builder: (context) => new test()));
           },
         ),
       ),
