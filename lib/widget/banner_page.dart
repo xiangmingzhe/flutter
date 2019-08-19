@@ -54,16 +54,13 @@ class BannerWidgetState extends State<BannerWidget> {
   @override
   void initState() {
     super.initState();
-    int length = widget.bannerData.length>0?widget.bannerData.length:0;
+    int length = widget.bannerData.length > 0 ? widget.bannerData.length : 0;
     double current = (CountMax / 2) - ((CountMax / 2) % length);
-    print("*****************");
-    print(current);
-    print("*****************2");
-  if(widget.bannerData!=null&&widget.bannerData.length>0){
-    bannerController = PageController(initialPage: current.toInt());
-  }else{
-    bannerController = PageController(initialPage: 0);
-  }
+    if (widget.bannerData != null && widget.bannerData.length > 0) {
+      bannerController = PageController(initialPage: current.toInt());
+    } else {
+      bannerController = PageController(initialPage: 0);
+    }
   }
 
   @override
@@ -72,11 +69,9 @@ class BannerWidgetState extends State<BannerWidget> {
       height: widget.bannerHeight,
       color: Colors.white,
       child: Stack(
-        children: <Widget>[
-//          res(),
-          viewPages(),
-          viewTips()
-        ],
+//        children: <Widget>[viewPages(), viewTips()],
+        children: <Widget>[viewPages()],
+
       ),
     );
   }
@@ -84,89 +79,75 @@ class BannerWidgetState extends State<BannerWidget> {
   /**
    * banner 图片组件
    * */
-//  Widget viewPages() {
-//    return PageView.builder(
-//      itemCount: CountMax,
-//      controller: bannerController,
-//      onPageChanged: onPageChanged,
-//      itemBuilder: (context, index) {
-//        return InkWell(
-//            onTap: () {
-//              if (null != widget.bannerPress) {
-//                widget.bannerPress(bannerIndex, widget.bannerData[bannerIndex]);
-//              }
-//            },
-//            child: widget.bannerBuild == null
-//                ? FadeInImage.memoryNetwork(
-//                    height: 100,
-//                    image: widget
-//                        .bannerData[index % widget.bannerData.length].bannerUrl,
-//                    fit: BoxFit.fitWidth)
-//                : widget.bannerBuild(index,
-//                    widget.bannerData[index % widget.bannerData.length]));
-//      },
-//    );
-//  }
-
   Widget viewPages() {
+    return Scaffold(
+      body: Container(
+        height: 120.0, //确保pageview的高度
+        child: PageView.builder(
+          controller: bannerController,
 
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                if (null != widget.bannerPress) {
+                  widget.bannerPress(
+                      bannerIndex, widget.bannerData[bannerIndex]);
+                }
+              },
+//                  child: widget.bannerBuild == null
+//                      ? memoryImage(index)
+//                      : widget.bannerBuild(index,
+//                      initBanner(index))
+            child: Container(
+              decoration: BoxDecoration(
+              image: DecorationImage(image: new NetworkImage(widget.bannerData[index % widget.bannerData.length].bannerUrl),fit: BoxFit.fitWidth)
+            ),
+            child:Row(
+              children: <Widget>[viewTips()],
+            ),
+            ),
 
-         return Scaffold(
-        body: Container(
-          height: 120.0, //确保pageview的高度
-          child: PageView.builder(
-            controller: bannerController,
-            itemBuilder: (context, index) {
-              return InkWell(
-                  onTap: () {
-                    if (null != widget.bannerPress) {
-                      widget.bannerPress(
-                          bannerIndex, widget.bannerData[bannerIndex]);
-                    }
-                  },
-                  child: widget.bannerBuild == null
-                      ? memoryImage(index)
-                      : widget.bannerBuild(index,
-                      initBanner(index)));
-            },
-            onPageChanged: onPageChanged,
-            reverse: true, //是否反转页面的顺序
-          ),
+            );
+          },
+          onPageChanged: onPageChanged,
+          reverse: false, //是否反转页面的顺序
         ),
-      );
-
-
+      ),
+    );
   }
 
-  BannerBean initBanner(int index){
-    BannerBean bannerBean=null;
-    var bannerLength=0;
-    if(widget.bannerData!=null&&widget.bannerData.length>0){
-      bannerLength=widget.bannerData.length;
-      bannerBean=widget.bannerData[index %bannerLength];
-    }else{
-      bannerBean=new BannerBean(
-          imageUrl: "http://img.pconline.com.cn/images/upload/upc/tx/bbs6/1010/24/c1/5622801_1287922101936_1024x1024.jpg", titleStr: "flutter云音乐", intentType: 0);
+  BannerBean initBanner(int index) {
+    BannerBean bannerBean = null;
+    var bannerLength = 0;
+    if (widget.bannerData != null && widget.bannerData.length > 0) {
+      bannerLength = widget.bannerData.length;
+      bannerBean = widget.bannerData[index % bannerLength];
+    } else {
+      bannerBean = new BannerBean(
+          imageUrl:
+              "http://img.pconline.com.cn/images/upload/upc/tx/bbs6/1010/24/c1/5622801_1287922101936_1024x1024.jpg",
+          titleStr: "flutter云音乐",
+          intentType: 0);
     }
     return bannerBean;
   }
 
-  Widget memoryImage(int index){
-    if(widget!=null&&widget.bannerData!=null&&widget.bannerData.length>0){
+  Widget memoryImage(int index) {
+    if (widget != null &&
+        widget.bannerData != null &&
+        widget.bannerData.length > 0) {
       return FadeInImage.memoryNetwork(
-          image: widget
-              .bannerData[index % widget.bannerData.length]
-              .bannerUrl,
-          fit: BoxFit.fitWidth
-
-      );
+          image: widget.bannerData[index % widget.bannerData.length].bannerUrl,
+          fit: BoxFit.fitWidth);
     }
     return null;
-}
-  Build loadImage(int index){
-    widget.bannerBuild(index,
-      widget.bannerData[index % widget.bannerData.length]);
-}
+  }
+
+  Build loadImage(int index) {
+    widget.bannerBuild(
+        index, widget.bannerData[index % widget.bannerData.length]);
+  }
+
   /**
    * 更新坐标与图片
    * */
@@ -182,18 +163,14 @@ class BannerWidgetState extends State<BannerWidget> {
     if (widget.bannerData.length <= 1) {
       return Align();
     }
-
     return Align(
-      alignment: Alignment.bottomCenter,
+      alignment: Alignment.bottomRight,
       child: Container(
-        height: 0,
         padding: EdgeInsets.all(5.0),
-        color: Colors.black,
+        color: Colors.transparent,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(widget.bannerData[bannerIndex].bannerTitle,
-                style: TextStyle(color: Colors.white)),
             Row(
               children: bannerCircle(),
             )

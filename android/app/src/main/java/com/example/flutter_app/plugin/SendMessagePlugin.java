@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import com.example.flutter_app.tools.MediaPlayerTools;
 
+import io.flutter.Log;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.PluginRegistry;
 
@@ -32,7 +33,15 @@ public class SendMessagePlugin implements EventChannel.StreamHandler{
             public void onPlayStatus(int playStatus) {
                 eventSink.success(playStatus);
             }
+
+            @Override
+            public void onReadLrc(String lrc) {
+                Log.d("---",lrc);
+                eventSink.success(lrc);
+            }
         });
+
+
     }
 
     @Override

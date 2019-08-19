@@ -9,41 +9,54 @@ import 'package:flutter_app/model/song/SongInfoModel.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter_app/ui/listener/Implements/onplaylistener.dart';
 
+
+
 class PlayDetails extends StatelessWidget {
+
+
+
   final SongInfo songInfo;
+  bool isHideClipWidget=false;//是否隐藏圆形
   PlayDetails({Key key, @required this.songInfo}) : super(key: key);
+
+  ClipAAnimationWidget clipAAnimationWidget;
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     BottomDialog.instance.setJump(false);
     var imageUrl = songInfo.albumImg.replaceAll("{size}", "");
     print("songInfo.albumImg222:"+songInfo.albumImg);
-      return new Container(
-        child: new Column(
-          children: <Widget>[
-            new ClipAAnimationWidget(songInfo:songInfo),
-//            new RotationTransition(turns: controller
-//            ,alignment: Alignment.center,
-//              child: Container(
-//                child: new Column(children: <Widget>[
-//                  new ClipRRect(borderRadius: BorderRadius.circular(250.0),
-//                    child: new Image.network(imageUrl,),
-//                  )
-//                ],),color: Colors.white
-//              ),
-//            )
-          ],
-
-        ),color: Colors.white,
+    getClipWidget();
+    return new GestureDetector(onTap: (){
+      print("点击了页面");
+      switchingState();
+      if(clipAAnimationWidget!=null){
+        clipAAnimationWidget.switchingView(isHideClipWidget);
+      }
+    },
+    child: new Container(
+      child: new Column(
+        children: <Widget>[
+          clipAAnimationWidget,
+        ],
+      ),color: Colors.white,
       padding: EdgeInsets.fromLTRB(20.0,150.0,20.0,0.0),
       alignment: Alignment.center,
-      );
-
+    ) ,
+    );
   }
-
-
-
-
+  ClipAAnimationWidget getClipWidget(){
+    if(clipAAnimationWidget==null){
+      clipAAnimationWidget=new ClipAAnimationWidget(songInfo:songInfo);
+    }
+  }
+  void  switchingState(){
+      if(isHideClipWidget){
+        isHideClipWidget=false;
+      }else{
+        isHideClipWidget=true;
+      }
+  }
 
 }
 class ClipAAnimationWidget extends StatefulWidget {
@@ -51,7 +64,14 @@ class ClipAAnimationWidget extends StatefulWidget {
   final SongInfo songInfo;
   ClipAAnimation clipAAnimation;
   ClipAAnimationWidget({Key key, @required this.songInfo}) : super(key: key);
-//  ClipAAnimation createState() => new ClipAAnimation();
+
+  void switchingView(bool switchView){
+    if(clipAAnimation!=null){
+      clipAAnimation.switchView(switchView);
+    }
+  }
+
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -66,7 +86,7 @@ class ClipAAnimationWidget extends StatefulWidget {
 
 class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProviderStateMixin{
   SongInfo songInfo;
-
+  bool isSwitchView=false;
   void setData(SongInfo songInfo){
     this.songInfo=songInfo;
   }
@@ -110,6 +130,11 @@ class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProvide
     onMusicPlayListener.setAnimationController(controller);
     BottomDialog.instance.setOnPlayListener(onMusicPlayListener);
   }
+  void switchView(bool switchView){
+    setState((){
+      isSwitchView=switchView;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -119,21 +144,32 @@ class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProvide
     return new Container(
       child: new Column(
         children: <Widget>[
-          new RotationTransition(turns: controller
-            ,alignment: Alignment.center,
-            child: Container(
-                child: new Column(children: <Widget>[
-                  new ClipRRect(borderRadius: BorderRadius.circular(250.0),
-                    child: new Image.network(imageUrl,),
-                  )
-                ],),color: Colors.white
-            ),
-          )
+          getContentWidget(imageUrl)
         ],
       ),color: Colors.white,
       padding: EdgeInsets.fromLTRB(20.0,0.0,20.0,0.0),
       alignment: Alignment.center,
     );
+  }
+
+
+  Widget getContentWidget(String imageUrl){
+    Widget contentWidget=null;
+    if(!isSwitchView){
+      contentWidget=new RotationTransition(turns: controller
+        ,alignment: Alignment.center,
+        child: Container(
+            child: new Column(children: <Widget>[
+              new ClipRRect(borderRadius: BorderRadius.circular(250.0),
+                child: new Image.network(imageUrl,),
+              )
+            ],),color: Colors.white
+        ),
+      );
+    }else{
+      contentWidget=new Text("歌词正在加载中");
+    }
+    return contentWidget;
   }
 }
 

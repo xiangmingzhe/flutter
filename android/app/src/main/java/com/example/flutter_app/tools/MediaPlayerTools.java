@@ -76,5 +76,6 @@ public class MediaPlayerTools {
     }
     public interface OnMediaPlayListener{
         void onPlayStatus(int playStatus);
+        void onReadLrc(String lrc);
     }
 }
