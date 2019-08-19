@@ -1,6 +1,6 @@
-# flutter_app
+# flutter音乐
 
-A new Flutter application.
+flutter音乐是基于酷狗api实现个人音乐的播放器，仅用于个人学习使用。
 
 ## Getting Started
 
