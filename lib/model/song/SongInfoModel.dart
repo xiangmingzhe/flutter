@@ -38,6 +38,8 @@ class SongInfo{
   List<String> backupUrl;
   int timeLength;
 
+
+
   SongInfo(
       {this.fileHead,
         this.q,

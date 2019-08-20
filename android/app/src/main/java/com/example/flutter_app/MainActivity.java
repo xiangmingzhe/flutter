@@ -3,6 +3,7 @@ package com.example.flutter_app;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.example.flutter_app.lrc.LyricAnalysis;
 import com.example.flutter_app.plugin.LrcPlugin;
 import com.example.flutter_app.plugin.MusicPlayPlugin;
 import com.example.flutter_app.plugin.SendMessagePlugin;
@@ -30,4 +31,5 @@ public class MainActivity extends FlutterActivity {
     SendMessagePlugin.registerWith(registrar.registrarFor(SendMessagePlugin.CHANNEL));
     LrcPlugin.registerWith(registrar.registrarFor(LrcPlugin.CHANNEL));
   }
+
 }

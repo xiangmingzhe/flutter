@@ -34,13 +34,13 @@ public class LrcPlugin implements MethodChannel.MethodCallHandler{
         switch (methodCall.method){
             case "lrc"://歌词解析
                 try {
-                   String lrc=LyricAnalysis.getKrcText(methodCall.argument("lrc"),methodCall.argument("lrcName"));
-                   Log.d(TAG,"tag-n debug lrc:"+lrc);
+                    Log.d(TAG,"tag-n debug lrc:");
+                    String lrc=LyricAnalysis.getKrcText(methodCall.argument("lrc"),methodCall.argument("lrcName"));
                    if(MediaPlayerTools.getInstance().onMediaPlayListener!=null){
                        MediaPlayerTools.getInstance().onMediaPlayListener.onReadLrc(lrc);
                    }
                 }catch (Exception e){
-
+                    Log.d(TAG,"tag-n debug e:"+e.getMessage());
                 }
                 break;
 

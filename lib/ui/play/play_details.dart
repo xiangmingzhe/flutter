@@ -16,8 +16,9 @@ class PlayDetails extends StatelessWidget {
 
 
   final SongInfo songInfo;
+  final String lrc;
   bool isHideClipWidget=false;//是否隐藏圆形
-  PlayDetails({Key key, @required this.songInfo}) : super(key: key);
+  PlayDetails({Key key, @required this.songInfo,@required this.lrc}) : super(key: key);
 
   ClipAAnimationWidget clipAAnimationWidget;
   @override
@@ -47,7 +48,7 @@ class PlayDetails extends StatelessWidget {
   }
   ClipAAnimationWidget getClipWidget(){
     if(clipAAnimationWidget==null){
-      clipAAnimationWidget=new ClipAAnimationWidget(songInfo:songInfo);
+      clipAAnimationWidget=new ClipAAnimationWidget(songInfo:songInfo,lrc:lrc);
     }
   }
   void  switchingState(){
@@ -62,8 +63,9 @@ class PlayDetails extends StatelessWidget {
 class ClipAAnimationWidget extends StatefulWidget {
 
   final SongInfo songInfo;
+  final String lrc;
   ClipAAnimation clipAAnimation;
-  ClipAAnimationWidget({Key key, @required this.songInfo}) : super(key: key);
+  ClipAAnimationWidget({Key key, @required this.songInfo,@required this.lrc}) : super(key: key);
 
   void switchingView(bool switchView){
     if(clipAAnimation!=null){
@@ -77,7 +79,7 @@ class ClipAAnimationWidget extends StatefulWidget {
     // TODO: implement createState
     if(clipAAnimation==null){
       clipAAnimation=new ClipAAnimation();
-      clipAAnimation.setData(songInfo);
+      clipAAnimation.setData(songInfo,lrc);
     }
 
     return clipAAnimation;
@@ -87,14 +89,17 @@ class ClipAAnimationWidget extends StatefulWidget {
 class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProviderStateMixin{
   SongInfo songInfo;
   bool isSwitchView=false;
-  void setData(SongInfo songInfo){
+  String lrc;
+  void setData(SongInfo songInfo,String lrc){
     this.songInfo=songInfo;
+    this.lrc=lrc;
   }
   initState() {
     super.initState();
     _getController();
     initPlayListener();
   }
+
 //创建一个动画controller
   AnimationController controller;
   AnimationController _getController(){
@@ -136,11 +141,17 @@ class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProvide
     });
   }
   @override
+  void dispose() {
+    // TODO: implement dispose
+    if(controller!=null)
+      controller.stop();
+    BottomDialog.instance.setJump(true);
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     // TODO: implement build
     var imageUrl = songInfo.albumImg.replaceAll("{size}", "");
-    print("songInfo.albumImg333:"+songInfo.albumImg);
-//    _getController();
     return new Container(
       child: new Column(
         children: <Widget>[
@@ -161,13 +172,17 @@ class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProvide
         child: Container(
             child: new Column(children: <Widget>[
               new ClipRRect(borderRadius: BorderRadius.circular(250.0),
-                child: new Image.network(imageUrl,),
+//                child: new Image.network(imageUrl,),
+              child: new Image.asset("images/on_icon.jpg"),
               )
             ],),color: Colors.white
         ),
       );
     }else{
-      contentWidget=new Text("歌词正在加载中");
+//      contentWidget=new Text(lrc,style: TextStyle(fontSize: 10),);
+        contentWidget=new ListView.builder(itemCount: 10, shrinkWrap: true,itemBuilder: (context,index){
+          return new ListTile(title: new Text("歌词加载中",style: TextStyle(fontSize: 20,color: Colors.yellow),),);
+        });
     }
     return contentWidget;
   }

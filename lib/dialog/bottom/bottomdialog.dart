@@ -1,9 +1,9 @@
  import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/listener/Interface/onPlayListener.dart';
 import 'package:flutter_app/ui/play/play_details.dart';
 
-import '../../test.dart';
 
 class BottomDialog{
 
@@ -26,6 +26,7 @@ class BottomDialog{
   OverlayEntry bottomOverlayEntry;
   String imageUrl;
   String songName;
+  String lrc;
   String singerName;
   var _count;
   var iconUrl;
@@ -61,13 +62,15 @@ class BottomDialog{
     this.isJump=isJump;
     setState();
   }
-  void updateDialogData(String imageUrl,String songName,String singerName){
+  void updateDialogData(String imageUrl,String songName,String singerName,String lrc){
       this.imageUrl=imageUrl;
       this.songName=songName;
       this.singerName=singerName;
+      this.lrc=lrc;
       isRefreshIcon=false;
       setState();
   }
+
 
 
    /**
@@ -92,9 +95,10 @@ class BottomDialog{
                        Navigator.push(
                          context,
                          new MaterialPageRoute(
-                           builder: (context) => new PlayDetails(songInfo: songInfo),
+                           builder: (context) => new PlayDetails(songInfo: songInfo,lrc:lrc),
                          ),
                        );
+
                      }else{
 
                      }
