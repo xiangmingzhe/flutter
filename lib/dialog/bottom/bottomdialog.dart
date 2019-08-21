@@ -1,7 +1,9 @@
  import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/model/song/SongInfoModel.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/listener/Interface/onPlayListener.dart';
+import 'package:flutter_app/ui/page/newMusicListPage.dart';
 import 'package:flutter_app/ui/play/play_details.dart';
 
 
@@ -33,6 +35,7 @@ class BottomDialog{
   bool isRefreshIcon=false;
   bool isJump=true;//是否支持跳转
   setState(){
+
     if(isRefreshIcon){ //刷新icon
       if (_count == 0) {
         //播放
@@ -47,6 +50,9 @@ class BottomDialog{
           onPlayListener.onPause();
         }
       }
+      print("setState*******************");
+      print(isRefreshIcon);
+      print(iconUrl);
     }else{ //刷新内容
 
     }
@@ -79,7 +85,14 @@ class BottomDialog{
 
   void showBottomDialog(BuildContext buildContext,
        var _platform,var _musicPlatform) {
-     iconUrl = "images/s_pause.png";
+    //                     bottomOverlayEntry.remove();
+    print("showBottomDialog");
+    if(bottomOverlayEntry!=null){
+      bottomOverlayEntry.remove();
+    }
+     if(null==iconUrl){
+       iconUrl = "images/s_pause.png";
+     }
      bottomOverlayEntry = new OverlayEntry(builder: (context) {
        return new Positioned(
            bottom: 0,
@@ -102,8 +115,6 @@ class BottomDialog{
                      }else{
 
                      }
-
-//                     bottomOverlayEntry.remove();
                    },
                    child: new Container(
                      color: Colors.amberAccent,

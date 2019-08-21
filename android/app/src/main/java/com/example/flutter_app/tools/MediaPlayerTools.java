@@ -1,6 +1,7 @@
 package com.example.flutter_app.tools;
 
 import android.media.MediaPlayer;
+import android.os.Handler;
 
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ public class MediaPlayerTools {
     public static MediaPlayerTools mMediaPlayerTools = null;
     private MediaPlayer mediaPlayer;
     private int curStatus=SONG_PLAY;
+    private String playUrl;// 当前播放歌曲的url
     public static MediaPlayerTools getInstance() {
         if (mMediaPlayerTools == null) {
             mMediaPlayerTools = new MediaPlayerTools();
@@ -34,23 +36,37 @@ public class MediaPlayerTools {
     }
 
     public void play(String url) {
-        try {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
-                mediaPlayer.reset();
-            }
-            mediaPlayer.setDataSource(url);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            if(onMediaPlayListener!=null){
-                onMediaPlayListener.onPlayStatus((curStatus=SONG_PLAY));
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.playUrl=url;
+        mHandler.post(mRunable);
     }
 
+    Handler mHandler=new Handler();
+    Runnable mRunable=new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    mediaPlayer.reset();
+                }
+                mediaPlayer.setLooping(true);//设置循环播放
+                mediaPlayer.setDataSource(playUrl);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                if(onMediaPlayListener!=null){
+                    onMediaPlayListener.onPlayStatus((curStatus=SONG_PLAY));
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    private void releaseHandler(){
+        if(mHandler!=null){
+            mHandler.removeCallbacksAndMessages(null);
+        }
+    }
     public void pause() {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
@@ -58,6 +74,7 @@ public class MediaPlayerTools {
     }
     public void onResume(){
         if (mediaPlayer.isPlaying()) {
+            releaseHandler();
             mediaPlayer.pause();
             if(onMediaPlayListener!=null){
                 onMediaPlayListener.onPlayStatus((curStatus=SONG_PAUSE));

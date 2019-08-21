@@ -35,15 +35,15 @@ class PlayDetails extends StatelessWidget {
         clipAAnimationWidget.switchingView(isHideClipWidget);
       }
     },
-    child: new Container(
-      child: new Column(
-        children: <Widget>[
-          clipAAnimationWidget,
-        ],
-      ),color: Colors.white,
-      padding: EdgeInsets.fromLTRB(20.0,150.0,20.0,0.0),
-      alignment: Alignment.center,
-    ) ,
+      child: new Container(
+        child: new Column(
+          children: <Widget>[
+            clipAAnimationWidget,
+          ],
+        ),color: Colors.white,
+        padding: EdgeInsets.fromLTRB(20.0,150.0,20.0,0.0),
+        alignment: Alignment.center,
+      ) ,
     );
   }
   ClipAAnimationWidget getClipWidget(){
@@ -52,11 +52,11 @@ class PlayDetails extends StatelessWidget {
     }
   }
   void  switchingState(){
-      if(isHideClipWidget){
-        isHideClipWidget=false;
-      }else{
-        isHideClipWidget=true;
-      }
+    if(isHideClipWidget){
+      isHideClipWidget=false;
+    }else{
+      isHideClipWidget=true;
+    }
   }
 
 }
@@ -90,6 +90,8 @@ class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProvide
   SongInfo songInfo;
   bool isSwitchView=false;
   String lrc;
+  Widget lrcWidget;
+  Widget rotationTransition;
   void setData(SongInfo songInfo,String lrc){
     this.songInfo=songInfo;
     this.lrc=lrc;
@@ -167,22 +169,28 @@ class ClipAAnimation extends State<ClipAAnimationWidget>with SingleTickerProvide
   Widget getContentWidget(String imageUrl){
     Widget contentWidget=null;
     if(!isSwitchView){
-      contentWidget=new RotationTransition(turns: controller
-        ,alignment: Alignment.center,
-        child: Container(
-            child: new Column(children: <Widget>[
-              new ClipRRect(borderRadius: BorderRadius.circular(250.0),
-//                child: new Image.network(imageUrl,),
-              child: new Image.asset("images/on_icon.jpg"),
-              )
-            ],),color: Colors.white
-        ),
-      );
+      if(rotationTransition==null){
+        rotationTransition=new RotationTransition(turns: controller
+          ,alignment: Alignment.center,
+          child: Container(
+              child: new Column(children: <Widget>[
+                new ClipRRect(borderRadius: BorderRadius.circular(250.0),
+                  child: new Image.network(imageUrl,),
+//              child: new Image.asset("images/on_icon.jpg"),
+                )
+              ],),color: Colors.white
+          ),
+        );
+      }
+        contentWidget=rotationTransition;
     }else{
-//      contentWidget=new Text(lrc,style: TextStyle(fontSize: 10),);
-        contentWidget=new ListView.builder(itemCount: 10, shrinkWrap: true,itemBuilder: (context,index){
-          return new ListTile(title: new Text("歌词加载中",style: TextStyle(fontSize: 20,color: Colors.yellow),),);
-        });
+      if(lrcWidget==null){
+        lrcWidget=new Text("歌词加载中...",style: TextStyle(color: Colors.red,decoration: TextDecoration.none),);
+//        lrcWidget=new ListView.builder(itemCount: 10, shrinkWrap: true,itemBuilder: (context,index){
+//          return new ListTile(title: new Text("歌词加载中",style: TextStyle(fontSize: 20,color: Colors.yellow),),);
+//        });
+      }
+      contentWidget=lrcWidget;
     }
     return contentWidget;
   }
