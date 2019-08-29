@@ -5,6 +5,7 @@ import 'package:flutter_app/dialog/bottom/bottomdialog.dart';
 import 'package:flutter_app/dialog/customdialog.dart';
 import 'package:flutter_app/http/Config.dart';
 import 'package:flutter_app/model/BannerBean.dart';
+import 'package:flutter_app/model/fnative/fnative_entity.dart';
 import 'package:flutter_app/model/lrc/songInfoLrc.dart';
 import 'package:flutter_app/model/lrc/songlrc.dart';
 import 'package:flutter_app/model/rankmusic/rankmusic.dart';
@@ -28,6 +29,7 @@ class MusicTable {
 
   MusicTable(this.text, this.tab);
 }
+
 const _platform = const MethodChannel('com.mrper.framework.plugins/toast');
 final List<MusicTable> musicList = <MusicTable>[
   new MusicTable("音乐新歌榜", "newSong"),
@@ -109,16 +111,21 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
 
   void _onEvent(Object event) {
     setState(() {
-        if (event.toString().length > 1) {
-          if(event.toString().contains("读写权限获取失败")){
-            _platform.invokeMethod('showall', {'msg': "读写权限获取失败"}); //调用相应方法，并传入相关参数。
-          }else{
+      FnativeEntity fNative =FnativeEntity.fromJson(json.decode(event.toString()));;
+      print("fNative" + fNative.head);
+      switch (fNative.head) {
+        case "0":
+          if (fNative.body.toString().contains("读写权限获取失败")) {
+            _platform.invokeMethod(
+                'showall', {'msg': "读写权限获取失败"}); //调用相应方法，并传入相关参数。
+          } else {
             playMusic(event.toString());
           }
-        } else {
-          _count = event;
-          print("ChannelPage: $event");
-          if (_count == 0) {
+          break;
+        case "1":
+          _count =int.parse(fNative.body) ;
+          print("ChannelPage: $fNative.body");
+          if (_count== 0) {
             //播放
             iconUrl = "images/s_pause.png";
           } else if (_count == 2) {
@@ -126,9 +133,27 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
             iconUrl = "images/s_play.png";
           }
           bottomDialog.updateIocn(_count);
-        }
+          break;
+      }
 
-
+//        if (event.toString().length > 1) {
+//          if(event.toString().contains("读写权限获取失败")){
+//            _platform.invokeMethod('showall', {'msg': "读写权限获取失败"}); //调用相应方法，并传入相关参数。
+//          }else{
+//            playMusic(event.toString());
+//          }
+//        } else {
+//          _count = event;
+//          print("ChannelPage: $event");
+//          if (_count == 0) {
+//            //播放
+//            iconUrl = "images/s_pause.png";
+//          } else if (_count == 2) {
+//            //暂停
+//            iconUrl = "images/s_play.png";
+//          }
+//          bottomDialog.updateIocn(_count);
+//        }
     });
   }
 
