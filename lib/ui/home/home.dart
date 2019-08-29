@@ -10,6 +10,7 @@ import 'package:flutter_app/model/lrc/songInfoLrc.dart';
 import 'package:flutter_app/model/lrc/songlrc.dart';
 import 'package:flutter_app/model/rankmusic/rankmusic.dart';
 import 'package:flutter_app/model/song/SongInfoModel.dart';
+import 'package:flutter_app/ui/lockscreen/lockscreen.dart';
 import 'package:flutter_app/ui/page/musicChartsPage.dart';
 import 'package:flutter_app/ui/page/newMusicListPage.dart';
 import 'package:flutter_app/ui/page/singPage.dart';
@@ -72,7 +73,7 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
   }
 
   DateTime lastPopTime;
-
+  BuildContext userContext;
   @override
   void deactivate() {
     // TODO: implement deactivate
@@ -84,6 +85,7 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     // TODO: implement build
     print("重新build...");
+    userContext=context;
     return new MaterialApp(
         home: new Scaffold(
       appBar: new AppBar(
@@ -134,26 +136,29 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
           }
           bottomDialog.updateIocn(_count);
           break;
-      }
+        case "2":
+          switch (fNative.body){
+            case "1": //开屏
 
-//        if (event.toString().length > 1) {
-//          if(event.toString().contains("读写权限获取失败")){
-//            _platform.invokeMethod('showall', {'msg': "读写权限获取失败"}); //调用相应方法，并传入相关参数。
-//          }else{
-//            playMusic(event.toString());
-//          }
-//        } else {
-//          _count = event;
-//          print("ChannelPage: $event");
-//          if (_count == 0) {
-//            //播放
-//            iconUrl = "images/s_pause.png";
-//          } else if (_count == 2) {
-//            //暂停
-//            iconUrl = "images/s_play.png";
-//          }
-//          bottomDialog.updateIocn(_count);
-//        }
+              break;
+            case "2"://锁屏
+              Navigator.push(
+                  userContext,
+                  new MaterialPageRoute(
+                    builder: (context) =>
+                    new LockScreen(),
+                  ));
+              break;
+            case "3"://解锁
+
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          break;
+      }
     });
   }
 

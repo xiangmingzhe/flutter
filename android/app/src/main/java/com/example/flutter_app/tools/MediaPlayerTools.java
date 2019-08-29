@@ -37,36 +37,31 @@ public class MediaPlayerTools {
 
     public void play(String url) {
         this.playUrl=url;
-        mHandler.post(mRunable);
-    }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.pause();
+                        mediaPlayer.reset();
+                    }
+                    mediaPlayer.setLooping(true);//设置循环播放
+                    mediaPlayer.setDataSource(playUrl);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    if(onMediaPlayListener!=null){
+                        onMediaPlayListener.onPlayStatus((curStatus=SONG_PLAY));
+                    }
 
-    Handler mHandler=new Handler();
-    Runnable mRunable=new Runnable() {
-        @Override
-        public void run() {
-            try {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                    mediaPlayer.reset();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                mediaPlayer.setLooping(true);//设置循环播放
-                mediaPlayer.setDataSource(playUrl);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-                if(onMediaPlayListener!=null){
-                    onMediaPlayListener.onPlayStatus((curStatus=SONG_PLAY));
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
-    };
-    private void releaseHandler(){
-        if(mHandler!=null){
-            mHandler.removeCallbacksAndMessages(null);
-        }
+        }).start();
     }
+
+
+
     public void pause() {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
@@ -74,7 +69,6 @@ public class MediaPlayerTools {
     }
     public void onResume(){
         if (mediaPlayer.isPlaying()) {
-            releaseHandler();
             mediaPlayer.pause();
             if(onMediaPlayListener!=null){
                 onMediaPlayListener.onPlayStatus((curStatus=SONG_PAUSE));
@@ -94,5 +88,15 @@ public class MediaPlayerTools {
     public interface OnMediaPlayListener{
         void onPlayStatus(int playStatus);
         void onReadLrc(String lrc);
+    }
+
+    public OnScreenListener onScreenListener;
+    public void setOnScreenListener(OnScreenListener listener){
+        this.onScreenListener=listener;
+    }
+    public interface OnScreenListener{
+        void onScreenOn();// 开屏
+        void onScreenOff();// 锁屏
+        void onUserPresent();// 解锁
     }
 }

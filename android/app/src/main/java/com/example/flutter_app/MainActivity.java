@@ -1,8 +1,11 @@
 package com.example.flutter_app;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
+import com.example.flutter_app.broadcast.ScreenBroadcastReceiver;
 import com.example.flutter_app.lrc.LyricAnalysis;
 import com.example.flutter_app.plugin.LrcPlugin;
 import com.example.flutter_app.plugin.MusicPlayPlugin;
@@ -19,6 +22,7 @@ public class MainActivity extends FlutterActivity {
     super.onCreate(savedInstanceState);
     GeneratedPluginRegistrant.registerWith(this);
     registerCustomPlugin(this);
+    registerBroadCast();
   }
 
   /**
@@ -32,4 +36,14 @@ public class MainActivity extends FlutterActivity {
     LrcPlugin.registerWith(registrar.registrarFor(LrcPlugin.CHANNEL));
   }
 
+  private ScreenBroadcastReceiver mScreenLockReceiver;
+  private void registerBroadCast(){
+    mScreenLockReceiver = new ScreenBroadcastReceiver();
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(Intent.ACTION_SCREEN_ON);
+    filter.addAction(Intent.ACTION_SCREEN_OFF);
+    filter.addAction(Intent.ACTION_USER_PRESENT);
+    //注册广播接收者
+    this.registerReceiver(mScreenLockReceiver,filter);
+  }
 }
