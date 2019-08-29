@@ -11,6 +11,7 @@ import 'package:flutter_app/model/rankmusic/rankmusic.dart';
 import 'package:flutter_app/model/song/SongInfoModel.dart';
 import 'package:flutter_app/ui/page/musicChartsPage.dart';
 import 'package:flutter_app/ui/page/newMusicListPage.dart';
+import 'package:flutter_app/ui/page/singPage.dart';
 import 'package:flutter_app/ui/play/play_details.dart';
 import 'package:flutter_app/widget/banner_page.dart';
 import 'package:path/path.dart';
@@ -27,7 +28,7 @@ class MusicTable {
 
   MusicTable(this.text, this.tab);
 }
-
+const _platform = const MethodChannel('com.mrper.framework.plugins/toast');
 final List<MusicTable> musicList = <MusicTable>[
   new MusicTable("音乐新歌榜", "newSong"),
   new MusicTable("音乐排行榜", "Song"),
@@ -46,6 +47,7 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
   StreamSubscription _subscription = null;
   var _count;
   var iconUrl;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -58,8 +60,12 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
     }
     _tabController = TabController(vsync: this, length: musicList.length)
       ..addListener(() {
-        if (_tabController.index.toDouble() ==
-            _tabController.animation.value) {}
+        if (_tabController.index.toDouble() == _tabController.animation.value) {
+          switch (_tabController.index) {
+            case 0:
+              break;
+          }
+        }
       });
   }
 
@@ -84,17 +90,6 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
         bottom: new TabBar(
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.label,
-          //迭代items 并生成Tab对象
-          onTap: (int i) {
-            curPosition = i;
-            switch (i) {
-              case 0:
-                break;
-              case 1:
-//                        getMusicRankingListData(MUSIC_RANK_LIST_DATA_URL);
-                break;
-            }
-          },
           tabs: musicList.map((MusicTable item) {
             return new Tab(text: item.text);
           }).toList(),
@@ -105,28 +100,35 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
       body: TabBarView(controller: _tabController, children: [
         _newMusicListPage(),
         _musicChart(),
-        new Text("cccc"),
-        new Text("cccc"),
-        new Text("ccc2c")
+        _singPage(),
+        new Text("测试2"),
+        new Text("测试3")
       ]),
     ));
   }
+
   void _onEvent(Object event) {
     setState(() {
-      if (event.toString().length > 1) {
-        playMusic(event.toString());
-      } else {
-        _count = event;
-        print("ChannelPage: $event");
-        if (_count == 0) {
-          //播放
-          iconUrl = "images/s_pause.png";
-        } else if (_count == 2) {
-          //暂停
-          iconUrl = "images/s_play.png";
+        if (event.toString().length > 1) {
+          if(event.toString().contains("读写权限获取失败")){
+            _platform.invokeMethod('showall', {'msg': "读写权限获取失败"}); //调用相应方法，并传入相关参数。
+          }else{
+            playMusic(event.toString());
+          }
+        } else {
+          _count = event;
+          print("ChannelPage: $event");
+          if (_count == 0) {
+            //播放
+            iconUrl = "images/s_pause.png";
+          } else if (_count == 2) {
+            //暂停
+            iconUrl = "images/s_play.png";
+          }
+          bottomDialog.updateIocn(_count);
         }
-        bottomDialog.updateIocn(_count);
-      }
+
+
     });
   }
 
@@ -136,12 +138,11 @@ class _testState extends State<test> with SingleTickerProviderStateMixin {
       print(error);
     });
   }
-
-
 }
 
 Widget newMusicListPage;
 Widget musicChart;
+Widget singPage;
 
 Widget _newMusicListPage() {
   if (newMusicListPage == null) {
@@ -149,14 +150,20 @@ Widget _newMusicListPage() {
   }
   return newMusicListPage;
 }
-Widget _musicChart(){
+
+Widget _musicChart() {
   if (musicChart == null) {
-      musicChart = MusicChart();
+    musicChart = MusicChart();
   }
   return musicChart;
 }
 
+Widget _singPage() {
+  if (singPage == null) {
+    singPage = new SingerPage();
+  }
+  return singPage;
+}
+
 List<BannerBean> bannerList = new List();
 var curPosition = 0;
-
-

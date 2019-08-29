@@ -20,7 +20,7 @@ class MusicChartsState extends State<MusicChart> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     // TODO: implement build
     getMusicRankingListData(MUSIC_RANK_LIST_DATA_URL);
-    return new Container(child: _widget(),);
+    return new Container(width: 500,height: 500,child: _widget(),);
   }
   var MUSIC_RANK_LIST_DATA_URL = "http://m.kugou.com/rank/list&json=true";
   Future<dynamic> getMusicRankingListData(var url) async {
@@ -34,15 +34,15 @@ class MusicChartsState extends State<MusicChart> with SingleTickerProviderStateM
 //    print("getMusicRankingListData.responseBody:" + responseBody);
     RankMusic rankMusic = RankMusic.fromJson(json.decode(responseBody));
     // 刷新页面
-    setState(() {
-      if (rankMusic.rank != null &&
-          rankMusic.rank.list != null &&
-          rankMusic.rank.list.length > 0) {
-        rankList = rankMusic.rank.list;
-      }
-    });
-    print("**********************rankList.length");
-    print(rankList.length);
+    if(mounted){
+      setState(() {
+        if (rankMusic.rank != null &&
+            rankMusic.rank.list != null &&
+            rankMusic.rank.list.length > 0) {
+          rankList = rankMusic.rank.list;
+        }
+      });
+    }
   }
 
 

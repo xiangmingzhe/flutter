@@ -41,6 +41,9 @@ public class LrcPlugin implements MethodChannel.MethodCallHandler{
                    }
                 }catch (Exception e){
                     Log.d(TAG,"tag-n debug e:"+e.getMessage());
+                    if(MediaPlayerTools.getInstance().onMediaPlayListener!=null){
+                        MediaPlayerTools.getInstance().onMediaPlayListener.onReadLrc("读写权限获取失败");
+                    }
                 }
                 break;
 
